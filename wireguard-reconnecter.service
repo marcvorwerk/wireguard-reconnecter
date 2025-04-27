@@ -1,0 +1,12 @@
+[Unit]
+Description=WireGuard Reconnecter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=infinity
+ExecStart=/usr/local/bin/wireguard-reconnecter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
