@@ -1,0 +1,31 @@
+name: Build Go Binary
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+
+      - name: Build binary
+        run: |
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 go build -o dist/wireguard-reconnecter main.go
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/wireguard-reconnecter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
