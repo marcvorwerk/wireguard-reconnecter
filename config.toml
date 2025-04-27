@@ -1,0 +1,5 @@
+[monitor]
+wireguard_interface = "wg0"
+ping_target = "192.168.178.1"
+initial_interval_seconds = 30
+max_interval_seconds = 300
