@@ -24,7 +24,8 @@ jobs:
       - name: Build binary
         run: |
           mkdir -p dist
-          GOOS=linux GOARCH=amd64 go build -o dist/wireguard-reconnecter main.go
+          TAG=$(git describe --tags --always)
+          GOOS=linux GOARCH=amd64 go build -ldflags="-X main.version=${TAG}" -o dist/wireguard-reconnecter main.go
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1

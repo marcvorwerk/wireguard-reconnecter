@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -9,6 +11,8 @@ import (
 	"github.com/go-ping/ping"
 	"github.com/pelletier/go-toml/v2"
 )
+
+var version = "testing"
 
 type MonitorConfig struct {
 	WireguardInterface   string `toml:"wireguard_interface"`
@@ -29,12 +33,12 @@ var (
 func loadConfig(path string) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatalf("Fehler beim Laden der Config: %v", err)
+		log.Fatalf("Error loading config file: %v", err)
 	}
 
 	err = toml.Unmarshal(data, &config)
 	if err != nil {
-		log.Fatalf("Fehler beim Parsen der Config: %v", err)
+		log.Fatalf("Error parsing config file: %v", err)
 	}
 
 	currentInterval = time.Duration(config.Monitor.InitialIntervalSecs) * time.Second
@@ -43,7 +47,7 @@ func loadConfig(path string) {
 func isVPNAlive() bool {
 	pinger, err := ping.NewPinger(config.Monitor.PingTarget)
 	if err != nil {
-		log.Printf("Fehler beim Erstellen des Pingers: %v", err)
+		log.Printf("Error: %v", err)
 		return false
 	}
 	pinger.Count = 1
@@ -51,7 +55,7 @@ func isVPNAlive() bool {
 
 	err = pinger.Run()
 	if err != nil {
-		log.Printf("Ping-Fehler: %v", err)
+		log.Printf("Ping Error: %v", err)
 		return false
 	}
 
@@ -60,18 +64,26 @@ func isVPNAlive() bool {
 }
 
 func restartWireGuard() {
-	log.Printf("VPN scheint down. Versuche Neustart von %s...", config.Monitor.WireguardInterface)
+	log.Printf("VPN down. Try restart of interface %s...", config.Monitor.WireguardInterface)
 	cmd := exec.Command("systemctl", "restart", "wg-quick@"+config.Monitor.WireguardInterface)
 	err := cmd.Run()
 	if err != nil {
-		log.Printf("Fehler beim Neustart: %v", err)
+		log.Printf("Error during restart: %v", err)
 	} else {
-		log.Println("WireGuard Service erfolgreich neu gestartet.")
+		log.Println("WireGuard Service successful restarted")
 	}
 }
 
 func main() {
-	log.Println("Starte WireGuard Monitor (Go Version mit Config)...")
+	showVersion := flag.Bool("version", false, "Print version and exit")
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Println("WireGuard Monitor version:", version)
+		os.Exit(0)
+	}
+
+	log.Println("Starte WireGuard Monitor")
 
 	loadConfig("config.toml")
 
