@@ -76,6 +76,7 @@ func restartWireGuard() {
 
 func main() {
 	showVersion := flag.Bool("version", false, "Print version and exit")
+	configPath := flag.String("config", "config.toml", "Path to config file")
 	flag.Parse()
 
 	if *showVersion {
@@ -85,7 +86,7 @@ func main() {
 
 	log.Println("Starte WireGuard Monitor")
 
-	loadConfig("config.toml")
+	loadConfig(*configPath)
 
 	for {
 		if isVPNAlive() {
@@ -104,4 +105,3 @@ func main() {
 		time.Sleep(currentInterval)
 	}
 }
-
